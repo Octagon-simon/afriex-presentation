@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Name Manager</title>
+    <style>
+        body {
+            font-family: sans-serif;
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .form-section {
+            flex: 1 0 33%;
+            margin: 10px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        h2 {
+            margin-bottom: 10px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"],
+        button {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+
+        input {
+            width: calc(100% - 16px);
+        }
+
+        button {
+            background-color: rgb(30, 129, 210);
+            color: #fff;
+            width: 100%;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        #name-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        #name-list li {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Simple Name Manager</h1>
+    <div class="container">
+
+        <section class="form-section">
+            <h2>Create</h2>
+            <form id="create-form">
+                <label for="new-name">New Name:</label>
+                <input type="text" id="new-name" name="new-name" required>
+                <button type="submit">Add Name</button>
+            </form>
+        </section>
+
+        <section class="form-section">
+            <h2>Read</h2>
+            <ul id="name-list"></ul>
+            <button id="read-btn">Get Names</button>
+        </section>
+
+        <section class="form-section">
+            <h2>Update</h2>
+            <form id="update-form">
+                <label for="update-name">Name to Update:</label>
+                <input type="text" id="update-name" name="update-name" required>
+                <label for="new-value">New Value:</label>
+                <input type="text" id="new-value" name="new-value" required>
+                <button type="submit">Update</button>
+            </form>
+        </section>
+        <section class="form-section">
+            <h2>Delete</h2>
+            <form id="delete-form">
+                <label for="delete-name">Name to Delete:</label>
+                <input type="text" id="delete-name" name="update-name" required>
+                <button id="delete-btn">Delete Name</button>
+        </section>
+    </div>
+
+    <script>
+        const createForm = document.getElementById('create-form');
+        const readBtn = document.getElementById('read-btn');
+        const updateForm = document.getElementById('update-form');
+        const deleteForm = document.getElementById('delete-form');
+        const deleteBtn = document.getElementById('delete-btn');
+        const nameList = document.getElementById('name-list');
+
+        function getNames() {
+            let names = [];
+            if (sessionStorage.getItem('names')) {
+                names = JSON.parse(sessionStorage.getItem('names'));
+            }
+            return names;
+        }
+
+        function updateNameList(names) {
+            nameList.innerHTML = '';
+            if (names.length === 0) {
+                nameList.innerHTML = '<li>No names found.</li>';
+            } else {
+                names.forEach(name => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = name;
+                    nameList.appendChild(listItem);
+                });
+            }
+        }
+
+        createForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+            const newName = document.getElementById('new-name').value;
+            const names = getNames();
+            names.push(newName);
+            sessionStorage.setItem('names', JSON.stringify(names));
+            alert(`Name "${newName}" added!`);
+            document.getElementById('new-name').value = '';
+            updateNameList(names);
+        });
+
+        readBtn.addEventListener('click', function () {
+            const names = getNames();
+            updateNameList(names);
+        });
+
+        updateForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+            const updateName = document.getElementById('update-name').value;
+            const newValue = document.getElementById('new-value').value;
+            const names = getNames();
+            const index = names.indexOf(updateName);
+            if (index > -1) {
+                names[index] = newValue;
+                sessionStorage.setItem('names', JSON.stringify(names));
+                alert(`Name "${updateName}" updated to "${newValue}"!`);
+                document.getElementById('update-name').value = '';
+                document.getElementById('new-value').value = '';
+            } else {
+                alert(`Name "${updateName}" not found!`);
+            }
+            updateNameList(names);
+        });
+
+        deleteForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+            const deleteName = document.getElementById('delete-name').value;
+            if (deleteName) {
+                const names = getNames();
+                const index = names.indexOf(deleteName);
+                if (index > -1) {
+                    names.splice(index, 1);
+                    sessionStorage.setItem('names', JSON.stringify(names));
+                    alert(`Name "${deleteName}" deleted!`);
+                } else {
+                    alert(`Name "${deleteName}" not found!`);
+                }
+                updateNameList(names);
+            }
+        });
+    </script>
+</body>
+
+</html>
